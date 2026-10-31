@@ -8,8 +8,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Unzip project
-        run: unzip -o Vrinda-Final.zip -d project
+      - name: Find project (unzip if needed)
+        run: |
+          if [ -f Vrinda-Final.zip ]; then
+            unzip -o Vrinda-Final.zip -d project
+            echo "DIR=project" >> "$GITHUB_ENV"
+          else
+            echo "DIR=." >> "$GITHUB_ENV"
+          fi
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -19,8 +25,8 @@ jobs:
           gradle-version: 8.9
       - name: Build
         run: gradle assembleDebug --no-daemon
-        working-directory: project
+        working-directory: ${{ env.DIR }}
       - uses: actions/upload-artifact@v4
         with:
           name: Jarvis-APK
-          path: project/app/build/outputs/apk/debug/app-debug.apk
+          path: ${{ env.DIR }}/app/build/outputs/apk/debug/app-debug.apk
